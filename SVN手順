@@ -1,0 +1,380 @@
+useradd -D← 初期設定確認
+GROUP=100
+HOME=/home
+INACTIVE=-1
+EXPIRE=
+SHELL=/bin/bash
+SKEL=/etc/skel
+[root@localhost ~]# useradd hogehoge　← ユーザー作成
+[root@localhost ~]# id -a hogehoge　← ユーザー確認
+パスワード変更
+passwd
+
+
+
+
+ --prefix=/usr/local/apache2.0.52 
+OPENSSL
+./config --prefix=/usr/local/ssl shared
+--enable-shared --enable-static
+
+make
+make install
+APACHE2
+./configure --prefix=/usr/local/apache2 --enable-dav --enable-so --enable-rewrite=shared --with-ssl=/usr/local/ssl --enable-ssl=shared --enable-module=status --with-mpm=worker
+./configure --prefix=/usr/local/apache2 --enable-dav --enable-so --enable-modules=ssl --with-ssl=/usr/local/ssl --enable-rewrite=shared --enable-proxy --enable-proxy-ajp
+make
+make install
+
+
+
+
+
+
+
+
+
+
+
+
+
+OPENSSL(openssl-0.9.7c)
+tar xvfz openssl-0.9.7c.tar.gz
+./config --prefix=/usr/local/ssl shared
+
+
+APACHE(httpd-2.2.3)
+tar xvzf httpd-2.2.3.tar.gz
+./configure --prefix=/usr/local/apache2 --enable-dav --enable-so --enable-rewrite=shared --with-ssl=/usr/local/ssl --enable-ssl=shared --enable-ssl=shared --enable-module=status --with-mpm=worker
+make
+make install
+/usr/local/apache2/bin/httpd -l
+cat /etc/ld.so.conf
+/sbin/ldconfig
+
+
+
+SVN
+
+
+./configure --prefix=/usr/local/svn --with-apxs=/usr/local/apache2/bin/apxs --with-apr=/usr/local/apr --with-apr-util=/usr/local/apr --with-neon=/usr/local/neon --with-swig=/usr/local/swig --without-jdk
+
+
+
+
+
+
+
+apache2を取得 †
+$ cd /usr/local/src/
+$ wget http://www.meisei-u.ac.jp/mirror/apache/dist/httpd/httpd-2.2.4.tar.gz
+$ tar zxf httpd-2.2.4.tar.gz↑
+aprのインストール †
+$ cd /usr/local/src/httpd-2.2.4/srclib/apr
+$ ./configure --prefix=/usr/local/apr --enable-threads
+$ make
+$ su -
+# make install↑
+apr-utilのインストール †
+$ cd /usr/local/src/httpd-2.2.4/srclib/apr-util
+$ ./configure --prefix=/usr/local/apr  --with-apr=/usr/local/apr
+###
+--with-expat=builtin
+libexpat.soは、/usr/libにもあるんだけど、64ビット用(x86_64)のは/usr/lib64にあると
+###
+$ make
+$ su -
+# make install↑
+apache2のインストール †
+$ cd /usr/local/src/httpd-2.2.4
+$ ./configure --prefix=/usr/local/apache2 --enable-maintainer-mode --enable-mods-shared=most --enable-dav --enable-dav-fs --enable-dav-lock --enable-cgi --enable-cgid --enable-cache --enable-mem-cache --enable-proxy --enable-proxy-balancer --enable-so --with-apr=/usr/local/apr --with-apr-util=/usr/local/apr
+$ make
+$ su -
+# make install↑
+httpd.conf修正 †
+0行目
+　Listen 80
+　　↓
+　Listen 7382117行目
+　User daemon
+　　↓
+　User apache118行目
+　Group daemon
+　　↓
+　Group apache215～217行目
+　<IfModule dir_module>
+　　DirectoryIndex index.html
+　</IfModule>54～106行目
+　LoadModuleを適当にコメント。Subversionを使うには、最低以下2つを書くように。
+  
+  LoadModule dav_svn_module     modules/mod_dav_svn.so
+  LoadModule authz_svn_module   modules/mod_authz_svn.so↑
+neonのインストール †
+http://www.webdav.org/neon/
+
+$ cd /usr/local/src/
+$ wget http://www.webdav.org/neon/neon-0.25.5.tar.gz
+$ tar zxf neon-0.25.5.tar.gz
+$ cd neon-0.25.5
+$ ./configure --prefix=/usr/local/neon --with-libxml2 --with-expat
+$ make
+$ su -
+# make install↑
+swingのインストール †
+http://www.swig.org/
+
+$ cd /usr/local/src/
+$ wget http://downloads.sourceforge.net/swig/swig-1.3.29.tar.gz?modtime=1142900547&big_mirror=0
+$ tar zxf swig-1.3.29.tar.gz
+$ cd swig-1.3.29
+$ ./configure --prefix=/usr/local/swig --with-python=/path/to/python --without-ruby --without-php4 --without-java --without-ocaml --without-csharp
+$ make
+$ su -
+# make install↑
+subversionのインストール †
+http://subversion.tigris.org/servlets/ProjectDocumentList?folderID=260&expandFolder=260&folderID=0
+
+$ cd /usr/local/src/
+$ wget http://subversion.tigris.org/downloads/subversion-1.4.4.tar.gz
+$ tar zxf subversion-1.4.4.tar.gz
+$ cd subversion-1.4.4
+$ ./configure --prefix=/usr/local/svn --with-apxs=/usr/local/apache2/bin/apxs --with-apr=/usr/local/apr --with-apr-util=/usr/local/apr --with-neon=/usr/local/neon --with-swig=/usr/local/swig --without-jdk
+$ make
+$ su -
+# make install※warningが出ても最後まで行く。
+
+↑
+初期設定 †
+# mkdir -p /home/svn/repos/
+# cd /home/svn/repos/
+# mkdir sample1
+# /usr/local/svn/bin/svnadmin create sample1
+# /usr/local/svn/bin/svn mkdir file:///home/svn/repos/sample1/trunk -m "create"
+# /usr/local/svn/bin/svn mkdir file:///home/svn/repos/sample1/branches -m "create"
+# /usr/local/svn/bin/svn mkdir file:///home/svn/repos/sample1/tags -m "create"
+# /usr/local/svn/bin/svn import /tmp/sample file:///home/svn/repos/sample1/trunk -m "initial sample"
+# chown -R apache:apache /home/svn/repos/sample1↑
+httpd.confに以下を追加 †
+<Location /svn>
+ DAV svn
+ SVNParentPath /home/svn/repos
+</Location>↑
+リポジトリの作成 †
+# mkdir -p /home/svn/repos/
+# cdcd /home/svn/repos/
+# mkdir sample
+# svnadmin create tm
+# svn mkdir file:///home/svn/repos/sample/trunk -m "create"
+# svn mkdir file:///home/svn/repos/sample/branches -m "create"
+# svn mkdir file:///home/svn/repos/sample/tags -m "create"↑
+所有者の変更 †
+# chown -R apache:apache /home/svn/repos/sample↑
+Apacheの再起動 †
+# /etc/init.d/httpd restart↑
+動作確認 †
+↑
+以下のURLにアクセスすると、ブラウザでリポジトリが表示される。 †
+http://localhost/svn/sample/
+
+
+
+ユーザー、パスワード設定
+ cd ｛Apacheインストールフォルダ｝/bin  
+
+ > htpasswd -c "｛ApacheインストールDir｝/bin/apachesvnpasswd" ｛UserName｝  
+
+ New password: ********  
+
+ Re-type new password: ********  
+
+ Adding password for user ｛UserName｝ 
+
+APサーバの設定
+<Location /svn/>  
+
+     DAV svn  
+
+     SVNParentPath "C:/repo/"  
+
+     SVNListParentPath on  
+
+     #AuthzSVNAccessFile bin/apachesvnauth  
+
+     AuthType Basic  
+
+     AuthName "Subversion repository"  
+
+     AuthUserFile bin/apachesvnpasswd  
+
+     Require valid-user  
+
+ </Location> 
+
+
+htpasswd -c -m /home/svn/repos/tm/conf/passwd 1075508
+
+htpasswd /home/svn/repos/tm/conf/passwd guest
+
+
+
+
+
+CVS ⇒ SVN
+
+$ cvs2svn -v  --fs-type=fsfs                       \
+  --encoding='EUC-JP' --fallback-encoding='EUC-JP' \
+  -s /GFD_Dennou_Club/ftp/arch/hoge/svnroot        \
+  /GFD_Dennou_Club/ftp/arch/hoge/cvsroot/project_name 
+で良いだろう.
+ ?末尾の project_name を指定しない場合には CVSROOT も移行されてしまう(多くの場合は不要)
+ ?svnroot は事前に作成してはいけない.
+ 
+もしくは --dump-only を指定して, リポジトリの dump を作成した後に, 作成した SVN リポジトリへ load する.
+ $ svnadmin create --fs-type=fsfs /GFD_Dennou_Club/ftp/arch/hoge/svnroot
+$ cvs2svn -v --fs-type=fsfs                                       \
+  --encoding='EUC-JP' --fallback-encoding='EUC-JP'                \
+  --dump-only /GFD_Dennou_Club/ftp/arch/hoge/cvsroot/project_name \
+  --dumpfile=project_name-dump
+$ svnadmin load < project_name-dump 
+複数のモジュールが存在する CVS リポジトリを変換する場合
+ 
+cvs2svn で svn リポジトリに変換すると trunk/tags/branches は svnroot 直下に置かれる. これをそのまま load すると
+ svnroot/trunk/project1
+              project2
+              ...
+        /tags/project1/tag_01
+                      /tag_02
+                      ...
+              project2/tag_01
+                      /tag_02
+                      ...
+        /branches/project1/branchA
+                           branchB
+                           ...
+                 /project2/branchA
+                           branchB
+                           .... 
+という配置になる. これを
+ svnroot/project1/trunk
+                /tags
+                /branches
+       /project2/trunk
+                /tags
+                /branches
+       ... 
+としたい場合には cvs2svn にて一度 dump ファイルを作成した後, 親ディレクト リを指定して svn リポジトリへ load する. 親ディレクトリは先に作成しておく必要がある.
+ $ svnadmin create --fs-type=fsfs /GFD_Dennou_Club/ftp/arch/hoge/svnroot  #=>リポジトリ作成
+
+$ svn mkdir file:///GFD_Dennou_Club/ftp/arch/hoge/svnroot/projectA \
+  -m "Create Project A directory"                                        #=>projectA の作成
+$ cvs2svn -v --fs-type=fsfs                                   \
+  --encoding='EUC-JP' --fallback-encoding='EUC-JP'            \
+  --dump-only /GFD_Dennou_Club/ftp/arch/hoge/cvsroot/projectA \
+  --dumpfile=projectA-dump                                               #=>dump の作成
+ $ svnadmin load /GFD_Dennou_Club/ftp/arch/hoge/svnroot \
+  --parent-dir projectA < projectA-dump                                  #=>dump の load
+  
+  
+  
+  
+/usr/local/python/bin/python2.7 /home/svnroot/cvs2svn-2.4.0/cvs2svn  -v --fs-type=fsfs --encoding=Shift_JIS --fallback-encoding=Shift_JIS --dump-only cvs/ --dumpfile=tm.dump
+
+
+
+sqlite-3.7.7.1 
+?http://www.sqlite.org/index.html
+ 
+autoconf 版を使ってみる。 前は amalgamation も tarball だったような気がするのだけれど、今見たら zip だったので、きっと、 autoconf 版を使えというお告げ 
+
+
+
+
+Compile 
+
+tar zxvf ~/sqlite-autoconf-3070701.tar.gz
+cd sqlite-autoconf-3070701/
+./configure --prefix=/usr/share/sqlite-3.7.7.1
+make 
+
+
+
+Install 
+
+su
+make install
+vi /etc/ld.so.conf.d/user.conf
+# /usr/share/sqlite-3.7.7.1/lib
+ldconfig
+cd /usr/share
+ln -s sqlite-3.7.7.1 sqlite 
+cd /usr/bin
+ln -s /usr/share/sqlite/bin/sqlite3 . 
+32
+ 
+cd /usr/lib/pkgconfig
+ln -s /usr/share/sqlite/lib/pkgconfig/sqlite3.pc . 
+64
+ 
+cd /usr/lib64/pkgconfig
+ln -s /usr/share/sqlite/lib/pkgconfig/sqlite3.pc .  
+  
+  
+  
+  ./configure --prefix=/usr/local/subversion-1.6.17.tar.gz --with-apxs=/usr/local/apache2/bin/apxs --with-berkeley-db=db4 --with-apr=/usr/local/apr --with-apr-util=/usr/local/apr --with-neon=/usr/local/neon --with-swig=/usr/local/swig 
+  
+  --with-berkeley-db=/usr/local
+  
+./configure --prefix=/usr/local/subversion-1.6.17 --with-neon=/usr/local/neon --with-berkeley-db
+
+tar zxvf ~/db-4.8.30.tar.gz
+cd db-4.8.30/build_unix
+
+../dist/configure --prefix=/usr/local/db-4.8.30 --enable-compat185 --enable-cxx
+make 
+
+
+
+Install 
+
+インストールされている db と db-utils は削除。db4-version、db4-util-version かな。 バージョンが乖離している場合には、以下でしめしているが、システムのライブラリは保全した上で削除する。
+ 
+su
+make install
+vi /etc/ld.so.conf.d/user.conf
+# /usr/local/db-4.8.30/lib
+ldconfig
+cd /usr/share/
+ln -s db-4.8.30 db4
+cd /usr/bin/
+ln -s /usr/local/db4/bin/db_* .
+cd /usr/include/
+ln -s /usr/local/db4/include/db* . 
+32bit
+ 
+cd /usr/lib/
+ln -s /usr/share/db4/lib/libdb* . 
+64bit
+ 
+cd /usr/lib64/
+ln -s /usr/share/db4/lib/libdb* .
+  
+  
+
+tar xvf ~/apr-util-1.5.2.tar.bz2
+cd apr-util-1.5.2/
+./configure --prefix=/usr/local/apr-util-1.5.2 --with-apr=/usr/local/apr --with-dbm=db4 --with-berkeley-db=/usr/local/db-4.8.30
+make 
+
+
+
+Update 
+
+su
+make install
+vi /etc/ld.so.conf.d/user.conf
+# /usr/share/apr-util-1.5.2/lib
+ldconfig
+cd /usr/share
+rm -f apr-util
+ln -s apr-util-1.5.2 apr-util  
+  Updated: C:\work\SVN\SA\trunk\src\sonet\release\conf\cctmk\log4j.properties  
