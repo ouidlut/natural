@@ -1,0 +1,31 @@
+①、python
+
+cd Python3.6
+./configure CFLAGS=-fPIC --with-pydebug --enable-loadable-sqlite-extensions --prefix=/usr/local/python3.6
+
+make
+
+make install
+
+②、mod_wsgi
+./configure CFLAGS=-fPIC --enable-shared
+
+make
+make install
+
+③、DJANGO
+④、BOOTFORM
+python setup.py install
+
+LoadModule wsgi_module modules/mod_wsgi.so
+
+WSGIScriptAlias / /usr/local/apache/htdocs/myNewBook/myNewBook/wsgi.py
+
+WSGIPythonPath /usr/local/apache/htdocs/myNewBook:/usr/local/python3.6/lib/python3.6/site-packages/
+
+<Directory /usr/local/apache/htdocs/myNewBook/myNewBook/>
+        <Files wsgi.py>
+        Order deny,allow
+        Allow from all
+        </Files>
+</Directory>
